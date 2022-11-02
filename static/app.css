@@ -1,0 +1,33 @@
+body {
+    background-color: gainsboro;
+    padding-left: 50px;
+    padding-top: 50px;
+}
+
+.details{
+    display: flex;
+    justify-content: center;
+    width: 500px;
+}
+
+img {
+    width: 200px;
+    margin: 30px;
+}
+#edit, #delete, h1, a{
+    margin: 30px;
+}
+
+#edit input, #delete input, #go_back{
+    width: 120px;
+}
+
+.form div {
+    margin: 20px;;
+}
+
+#go_back {
+    margin-top: 0;
+}
+
+

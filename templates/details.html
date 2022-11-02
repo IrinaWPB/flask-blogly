@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}
+{{user.first_name}} {{user.last_name}}
+{% endblock %}
+
+{% block content %}
+<h1>{{user.first_name}} {{user.last_name}}</h1>
+<div class="details">
+    <div class="photo">
+        <img src="{{user.image_url}}" alt="">
+    </div>
+
+    <div>
+        <form action="/{{user.id}}/edit" method="GET" id="edit">
+            <input type="submit" class="btn btn-primary" value="Edit">
+        </form>
+
+        <form action="/{{user.id}}/delete" method="POST" id="delete">
+            <input type="submit" class="btn btn-danger" value="Delete">
+        </form>    
+        <a href="/" class="btn btn-outline-info" id="go_back">Go back</a>
+    </div>   
+</div>
+
+{% endblock %}

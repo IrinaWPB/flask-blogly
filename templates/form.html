@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}
+Add Form
+{% endblock %}
+
+{% block content %}
+<h2>Add a new user:</h2>
+<form action="/new" method="POST" class="form">
+    <div>
+        <p>First Name</p>
+        <input type="text" name="first_name" minlength="3" placeholder="Enter a first name" required>
+    </div>
+    <div>
+        <p>Last name</p>
+        <input type="text" name="last_name" minlength="3" placeholder="Enter a last name" required>
+    </div>
+    <div>
+        <p>Image URL</p>
+        <input type="text" name="image" placeholder="Add a photo">
+    </div>
+    <div class="btns">
+        <input type="submit" class="btn btn-primary" value="Add">
+        <a href="/" class="btn btn-outline-info">Cancel</a>
+    </div>
+</form>
+
+{% endblock %}
