@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from app import app
-from models import db, User
+from models import db, User, Post
 
 # Use test database and don't clutter tests with SQL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///SQL_test_db'
@@ -24,12 +24,18 @@ class UserViewsTestCase(TestCase):
         """Add sample user."""
 
         User.query.delete()
+        Post.query.delete()
 
         user = User(first_name="Mark", last_name="Jones")
         db.session.add(user)
         db.session.commit()
-
         self.user_id = user.id
+
+        post = Post(title="Best Post", content="Blablabla", user_id=self.user_id)
+        db.session.add(post)
+        db.session.commit()
+
+        self.post_id = post.id
 
     def tearDown(self):
         """Clean up any fouled transaction."""
@@ -55,6 +61,7 @@ class UserViewsTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('<h1>Mark Jones</h1>', html)
+            self.assertIn('Best Post', html)
 
     def test_add_user_form(self):
         """Show add_user form"""
@@ -110,6 +117,42 @@ class UserViewsTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("<h1>Users</h1>", html)
             self.assertNotIn('Mark Jones', html)
+
+    def test_create_post(self):
+        """Test to create a new post"""
+
+        with app.test_client() as client:
+            d = {"title": "Hi", "content": "How are you?", "user_id": "9"}
+            resp = client.post(f'/{self.user_id}/posts/new', data=d, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("<h1>Mark Jones</h1>", html)
+            self.assertIn('Hi', html)
+
+    def test_edit_post(self):
+        """Test post updates"""
+
+        with app.test_client() as client:
+            d={'title':'Best Post', 'content':'Updated Content', 'user_id':'9'}
+            resp = client.post(f"/posts/{self.post_id}/edit", data=d, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("<h1>Best Post</h1>", html)
+            self.assertIn('Updated Content', html)
+
+    def test_delete_post(self):
+        """Test to delete post"""
+
+        with app.test_client() as client:
+            resp = client.post(f"/posts/{self.post_id}/delete",follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("<h1>Mark Jones</h1>", html)
+            self.assertNotIn('Best Post', html)
+
 
 
 

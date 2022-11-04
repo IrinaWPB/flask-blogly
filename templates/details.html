@@ -4,13 +4,18 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{user.first_name}} {{user.last_name}}</h1>
+
 <div class="details">
     <div class="photo">
-        <img src="{{user.image_url}}" alt="">
+        {% if user.image_url %}
+        <img src="{{user.image_url}}">
+        {% else %}
+        <img src="static/no_img.jpeg">
+        {% endif %}
     </div>
 
-    <div>
+    <div class="container">
+        <h1>{{user.first_name}} {{user.last_name}}</h1>
         <form action="/{{user.id}}/edit" method="GET" id="edit">
             <input type="submit" class="btn btn-primary" value="Edit">
         </form>
@@ -18,8 +23,17 @@
         <form action="/{{user.id}}/delete" method="POST" id="delete">
             <input type="submit" class="btn btn-danger" value="Delete">
         </form>    
-        <a href="/" class="btn btn-outline-info" id="go_back">Go back</a>
-    </div>   
-</div>
 
+        <h2>Posts</h2>
+        <ul>
+            {% for post in posts %}
+            <li><a href="/posts/{{post.id}}">{{post.title}}</a></li>
+            {% endfor %}
+        </ul>
+        <a class="btn btn-sm btn-primary" href="/{{user.id}}/posts/new">Add Post</a>
+    </div>  
+</div>
+<a href="/" class="btn btn-outline-info" id="go_back">Go back</a>
 {% endblock %}
+
+
