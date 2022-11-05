@@ -42,6 +42,31 @@ class Post(db.Model):
                           nullable=False)
 
     created_by = db.relationship('User')
+    tags = db.relationship('Tag',
+                           secondary='posttags',
+                           backref='posts')
+    
+    
+class Tag(db.Model):
+    __tablename__ =  'tags'
+
+    id = db.Column(db.Integer,
+                   primary_key=True,
+                   autoincrement=True)
+    name = db.Column(db.Text, 
+                     unique=True,
+                     nullable=False)
+
+
+class PostTag(db.Model):
+    __tablename__= 'posttags'
+
+    post_id = db.Column(db.Integer, 
+                        db.ForeignKey('posts.id', ondelete='CASCADE'),
+                        primary_key=True)
+    tag_id = db.Column(db.Integer, 
+                        db.ForeignKey('tags.id', ondelete='CASCADE'),
+                        primary_key=True)
 
 
 

@@ -1,7 +1,7 @@
 """Blogly application."""
-
+import unittest
 from flask import Flask, request, render_template, redirect, session
-from models import db, connect_db, User, Post
+from models import db, connect_db, User, Post, Tag, PostTag
 from datetime import datetime
 
 app = Flask(__name__)
@@ -77,12 +77,16 @@ def delete_user(user_id):
     return redirect('/')
 
 
+######################POSTS ROUTES########################
+
+
 @app.route('/<int:user_id>/posts/new')
 def show_post_form(user_id):
     """Add post form"""
 
     user = User.query.get_or_404(user_id)
-    return render_template('add_post.html', user=user)
+    tags = Tag.query.all()
+    return render_template('add_post.html', user=user, tags = tags)
 
 @app.route('/<int:user_id>/posts/new', methods=["POST"])
 def create_post(user_id):
@@ -90,10 +94,20 @@ def create_post(user_id):
 
     title = request.form["title"]
     content = request.form["content"]
-
+    tags = request.form.getlist("tag")
     new_post = Post(title=title, content=content, user_id=user_id)
     db.session.add(new_post)
     db.session.commit()
+
+    for tag in tags:
+        new_tag = Tag.query.filter_by(name = tag).first()
+        new_connection = PostTag(post_id=new_post.id, tag_id = new_tag.id)
+        db.session.add(new_connection)
+        db.session.commit()
+
+# for tag in tags:
+#         new_tag = Tag.query.filter_by(name=tag).first()
+#         new_post.append(new_tag)
 
     return redirect(f"/{user_id}")
 
@@ -108,8 +122,9 @@ def show_post(post_id):
 def show_edit_post_form(post_id):
     """Show post update form"""
 
+    tags = Tag.query.all()
     post = Post.query.get_or_404(post_id)
-    return render_template('update_post.html', post=post)
+    return render_template('update_post.html', post=post, tags=tags)
     
 
 @app.route('/posts/<int:post_id>/edit', methods=["POST"])
@@ -120,6 +135,15 @@ def edit_post_submit(post_id):
     post.title = request.form["title"]
     post.content = request.form["content"]
     db.session.commit()
+    tags = request.form.getlist("tag")
+    
+    PostTag.query.filter_by(post_id=post.id).delete()
+
+    for tag in tags:
+        new_tag = Tag.query.filter_by(name = tag).first()
+        new_connection = PostTag(post_id = post.id, tag_id = new_tag.id)
+        db.session.add(new_connection)
+        db.session.commit()
 
     return redirect(f'/posts/{post.id}')
 
@@ -130,3 +154,66 @@ def delete_post(post_id):
     Post.query.filter_by(id = post_id).delete()
     db.session.commit()
     return redirect(f"/{post.user_id}")
+
+#####################Tags ROUTES##########################
+
+@app.route('/tags')
+def list_all_tags():
+    """Shows all the tags"""
+
+    tags = Tag.query.all()
+    return render_template('tags.html', tags=tags)
+
+@app.route('/tags/<int:tag_id>')
+def show_tag(tag_id):
+    """Shows a single tag with "edit and "delete" options"""
+    
+    tag = Tag.query.get_or_404(tag_id)
+    
+    return render_template('tag_details.html', tag=tag)
+
+@app.route('/tags/new')
+def show_add_tag_form():
+    """Shows form to create a tag"""
+
+    return render_template('add_tag.html')
+
+@app.route('/tags/new', methods=["POST"])
+def add_tag():
+    """Creates a new tag"""
+    
+    name = request.form["name"]
+    new_tag = Tag(name=name)
+    db.session.add(new_tag)
+    db.session.commit()
+    
+    return redirect('/tags')
+
+@app.route('/tags/<int:tag_id>/edit')
+def show_edit_tag_form(tag_id):
+    """Show edit tag form"""
+
+    tag_to_edit = Tag.query.get(tag_id)
+
+    return render_template('edit_tag.html', tag = tag_to_edit)
+
+@app.route('/tags/<int:tag_id>/edit', methods=["POST"])
+def edit_tag(tag_id):
+    """Edit tag"""
+
+    tag_to_edit = Tag.query.get_or_404(tag_id)
+    tag_to_edit.name = request.form["name"]
+    db.session.commit()
+
+    return redirect('/tags')
+
+@app.route('/tags/<int:tag_id>/delete', methods=["POST"])
+def delete_tag(tag_id):
+    """Deletes the tag with that id"""
+    
+    Tag.query.filter_by(id = tag_id).delete()
+    db.session.commit()
+
+    return redirect('/tags')
+
+

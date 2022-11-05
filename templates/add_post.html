@@ -14,8 +14,14 @@ Add Post
         <p>Content</p>
         <input type="text" name="content" minlength="3" placeholder="Add post" required>
     </div>
+    <div>
+        {% for tag in tags %}
+        <input type="checkbox" id="tag{{loop.index}}" name="tag" value="{{tag.name}}">
+        <label for="tag{{loop.index}}">{{tag.name}}</label><br>
+        {% endfor %}
+    </div>
     <div class="btns">
-        <a href="/{{user.id}}>" class="btn btn-outline-info">Cancel</a>
+        <a href="/{{user.id}}" class="btn btn-outline-info">Cancel</a>
         <input type="submit" class="btn btn-primary" value="Add">     
     </div>
 </form>
